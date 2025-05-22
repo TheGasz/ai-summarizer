@@ -10,7 +10,7 @@ const App = () => {
   const [loading, setLoading] = useState(false);
   const [summarry, setSummary] = useState('');
   const [inputText, setInputText] = useState('');
-  const [model, setModel] = useState('meta-llama/llama-3.3-70b-instruct:free');
+  const [model, setModel] = useState('deepseek/deepseek-chat-v3-0324:free');
 
 
   useEffect

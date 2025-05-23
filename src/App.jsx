@@ -11,9 +11,13 @@ const App = () => {
   const [summarry, setSummary] = useState('');
   const [inputText, setInputText] = useState('');
   const [model, setModel] = useState('deepseek/deepseek-chat-v3-0324:free');
+  
 
 
-  useEffect
+  useEffect = ()=> {
+    const storedHistory = localStorage.getItem('summaryHistory') || [];
+    setHistory(JSON.parse(storedHistory));
+     }, [];
  
   return (
     <div className="App">

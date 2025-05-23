@@ -1,8 +1,8 @@
 import ReactMarkdown from "react-markdown";
 const History = ({ history, handleDelete }) => {
     return (
-        <section className="mt-8 bg-white p-4 rounded shadow">
-          <h2 className="text-xl font-semibold mb-2">Riwayat Ringkasan</h2>
+        <section className="w-full mt-8 bg-white p-4 rounded shadow mx-auto">
+          <h2 className="text-xl font-semibold mb-6">Riwayat Ringkasan</h2>
           {history.length === 0 ? (
             <p className="text-gray-700">Tidak ada riwayat ringkasan.</p>
           ) : (

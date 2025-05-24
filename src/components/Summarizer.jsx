@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { FaVolumeMute, FaVolumeUp } from "react-icons/fa";
 import jsPDF from "jspdf";
 import Swal from "sweetalert2";
+import { createWorker } from "tesseract.js";
 
 const Summarizer = ({
   inputText,
@@ -15,7 +16,39 @@ const Summarizer = ({
   loading,
   isSpeaking,
   setIsSpeaking,
+  ocr,
+  setOcr,
 }) => {
+  const [worker, setWorker] = useState(null);
+  useEffect(() => {
+    const initWorker = async () => {
+      const newWorker = await createWorker();
+      setWorker(newWorker);
+    };
+    initWorker();
+    return () => {
+      handleStopNgomong();
+      if (worker) {
+        worker.terminate();
+      }
+    };
+  }, []);
+
+  const handleImageUpload = async (event) => {
+    if (!worker) {
+      console.error("Worker belum siap!");
+      return;
+    }
+
+    const file = event.target.files[0];
+    const {
+      data: { text },
+    } = await worker.recognize(file);
+    console.log("Hasil OCR:", text);
+    setOcr(text);
+    setInputText((prevText) => prevText + "\n" + text);
+  };
+
   const handleNgomong = () => {
     const utterance = new SpeechSynthesisUtterance(summary);
     utterance.lang = "id-ID";
@@ -41,21 +74,14 @@ const Summarizer = ({
     }).then((result) => {
       if (result.isConfirmed) {
         const doc = new jsPDF();
-        const text = summary;
-
-        doc.text(text, 50, 50);
+        const wrappedText = doc.splitTextToSize(summary, 180);
+        doc.text(wrappedText, 10, 10);
         doc.save("document.pdf");
       } else {
         console.log("User membatalkan!");
       }
     });
   };
-
-  useEffect(() => {
-    return () => {
-      handleStopNgomong();
-    };
-  }, []);
 
   return (
     <>
@@ -94,6 +120,12 @@ const Summarizer = ({
           >
             Reset
           </button>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="mt-2 p-2 border border-gray-300 rounded cursor-pointer"
+          ></input>
         </div>
       </div>
       <section className="mt-8 bg-white p-4 rounded shadow">
@@ -103,7 +135,7 @@ const Summarizer = ({
             (!isSpeaking ? (
               <button
                 onClick={handleNgomong}
-                className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-red-600 transition cursor-pointer"
+                className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition cursor-pointer flex items-center gap-2"
               >
                 <FaVolumeUp />
                 Ngomong bang
@@ -111,7 +143,7 @@ const Summarizer = ({
             ) : (
               <button
                 onClick={handleStopNgomong}
-                className="px-6 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition cursor-pointer"
+                className="px-6 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition cursor-pointer flex items-center gap-2"
               >
                 <FaVolumeMute />
                 Meneng bang
@@ -122,7 +154,7 @@ const Summarizer = ({
               onClick={exportPdf}
               className="px-6 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition cursor-pointer flex items-center gap-2"
             >
-              export pdf
+              Export to PDF
             </button>
           )}
         </div>

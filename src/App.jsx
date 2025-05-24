@@ -11,6 +11,7 @@ const App = () => {
   const [inputText, setInputText] = useState("");
   const [model, setModel] = useState("deepseek/deepseek-chat-v3-0324:free");
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [ocr, setOcr] = useState("");
 
   useEffect(() => {
     const storedHistory = localStorage.getItem("summaryHistory");
@@ -41,7 +42,7 @@ const App = () => {
             messages: [
               {
                 role: "user",
-                content: `Summarize  without using any bullet points or numbering and any addition answer.Answer in language the use speak:\n${inputText}`,
+                content: `Summarize  without using any bullet points or numbering and any addition answer:\n${inputText}`,
               },
             ],
           }),
@@ -85,12 +86,13 @@ const App = () => {
           loading={loading}
           isSpeaking={isSpeaking}
           setIsSpeaking={setIsSpeaking}
+          ocr={ocr}
+          setOcr={setOcr}
         />
       </main>
-      <div className ="container mx-auto p-4">
+      <div className="container mx-auto p-4">
         <Histori history={history} handleDelete={handleDelete} />
       </div>
-    
     </div>
   );
 };

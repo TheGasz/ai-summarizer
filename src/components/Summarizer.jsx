@@ -20,6 +20,7 @@ const Summarizer = ({
   setOcr,
 }) => {
   const [worker, setWorker] = useState(null);
+  const [currentIndex, setCurrentIndex] = useState(-1);
   useEffect(() => {
     const initWorker = async () => {
       const newWorker = await createWorker();
@@ -57,10 +58,21 @@ const Summarizer = ({
       .find((voice) => voice.lang === "id-ID");
     window.speechSynthesis.speak(utterance);
     setIsSpeaking(true);
+    utterance.onboundary = (event) => {
+      console.log("Boundary event:", event);
+      const charIndex = event.charIndex;
+      const wordIndex = summary.substring(0, charIndex).split(" ").length - 1;
+      setCurrentIndex(wordIndex);
+      if (wordIndex >= summary.split(" ").length - 1) {
+        setIsSpeaking(false);
+        setCurrentIndex(-1);
+      }
+    };
   };
   const handleStopNgomong = () => {
     window.speechSynthesis.cancel();
     setIsSpeaking(false);
+    setCurrentIndex(-1);
   };
 
   const exportPdf = () => {
@@ -161,7 +173,20 @@ const Summarizer = ({
 
         <div className="text-gray-700">
           {summary ? (
-            <ReactMarkdown>{summary}</ReactMarkdown>
+            <>
+              <p>
+                {summary.split(" ").map((word, index) => (
+                  <span
+                    key={index}
+                    style={{
+                      fontWeight: index === currentIndex ? "bold" : "normal",
+                    }}
+                  >
+                    {word}{" "}
+                  </span>
+                ))}
+              </p>
+            </>
           ) : loading ? (
             <div className="flex items-center justify-center py-4">
               <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
